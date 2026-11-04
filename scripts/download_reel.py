@@ -54,8 +54,9 @@ def main():
         destination = args.output_dir.expanduser().resolve()
         destination.mkdir(parents=True, exist_ok=True)
         options = {
-            # Un único MP4 con audio y video evita depender de FFmpeg.
-            "format": "best[ext=mp4][vcodec!=none][acodec!=none]",
+            # Instagram puede omitir los códecs en sus metadatos. El signo ?
+            # acepta valores desconocidos, pero descarta pistas solo de audio/video.
+            "format": "best*[ext=mp4][vcodec!=?none][acodec!=?none]",
             "outtmpl": str(destination / "instagram_%(id)s.%(ext)s"),
             "noplaylist": True,
             "overwrites": False,
