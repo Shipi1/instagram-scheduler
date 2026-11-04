@@ -34,8 +34,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("url", type=reel_url, help="Enlace directo del Reel")
     parser.add_argument(
-        "--output-dir", type=Path, default=Path.cwd() / "downloads",
-        help="Carpeta de destino (por defecto: ./downloads)",
+        "--output-dir", type=Path, default=Path.home() / "ig-scheduler-files",
+        help="Carpeta de destino (por defecto: ~/ig-scheduler-files)",
     )
     parser.add_argument("--cookies", type=Path, help="Archivo opcional de cookies Netscape")
     args = parser.parse_args()
