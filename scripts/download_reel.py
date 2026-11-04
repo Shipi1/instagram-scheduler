@@ -9,7 +9,7 @@ from urllib.parse import urlsplit
 
 
 def reel_url(value):
-    """Aceptar solo enlaces directos a un Reel y descartar parámetros de rastreo."""
+    """Aceptar enlaces directos de Instagram y descartar parámetros de rastreo."""
     try:
         parsed = urlsplit(value.strip())
         valid = (
@@ -21,12 +21,13 @@ def reel_url(value):
         )
     except ValueError:
         valid = False
-    match = re.fullmatch(r"/reels?/([A-Za-z0-9_-]+)/?", parsed.path) if valid else None
+    match = re.fullmatch(r"/(reels?|p)/([A-Za-z0-9_-]+)/?", parsed.path) if valid else None
     if not match:
         raise argparse.ArgumentTypeError(
-            "Usa un enlace HTTPS directo: https://www.instagram.com/reel/CODIGO/"
+            "Usa un enlace HTTPS de Instagram con /reel/CODIGO/ o /p/CODIGO/."
         )
-    return f"https://www.instagram.com/reel/{match.group(1)}/"
+    kind = "p" if match.group(1) == "p" else "reel"
+    return f"https://www.instagram.com/{kind}/{match.group(2)}/"
 
 
 def main():
