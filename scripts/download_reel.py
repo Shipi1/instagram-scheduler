@@ -38,7 +38,15 @@ def main():
         help="Carpeta de destino (por defecto: ~/ig-scheduler-files)",
     )
     parser.add_argument("--cookies", type=Path, help="Archivo opcional de cookies Netscape")
+    parser.add_argument("--download-only", action="store_true", help="Descargar sin preparar con FFmpeg")
     args = parser.parse_args()
+
+    if not args.download_only:
+        try:
+            from prepare_video import prepare_video, require_tools
+            require_tools()
+        except (ImportError, RuntimeError) as error:
+            parser.exit(1, f"Error: {error}. Copia también prepare_video.py junto a este script.\n")
 
     try:
         from yt_dlp import YoutubeDL
@@ -77,6 +85,9 @@ def main():
                 raise RuntimeError("No se encontró un archivo descargado válido.")
         print(f"\nArchivo: {path}")
         print(f"Tamaño: {path.stat().st_size:,} bytes")
+        if not args.download_only:
+            ready = prepare_video(path)
+            print(f"Archivo preparado: {ready}")
         print("Descarga completada. No se ha publicado nada.")
         return 0
     except DownloadError:
