@@ -14,7 +14,7 @@ from app.config import Config
 from app.store import Store
 from scripts.download_reel import reel_url
 from scripts.prepare_video import prepare_video, require_tools
-from scripts.telegram_receive import APIError, call as telegram, load_allowed_users
+from scripts.telegram_receive import APIError, call as telegram, load_allowed_users, log_unauthorized
 
 
 HELP = ('Envía un enlace de Instagram en la primera línea y una descripción debajo. '
@@ -67,7 +67,7 @@ class Runner:
                     except ValueError as error:
                         reply = f'{error}\n{HELP}'
             else:
-                print(f'Usuario no autorizado: user_id={user}', flush=True)
+                log_unauthorized(message.get('from', {}))
         self.store.receive(update['update_id'], message, request, reply, self.c.account, self.c.version)
 
     def flush_notifications(self):

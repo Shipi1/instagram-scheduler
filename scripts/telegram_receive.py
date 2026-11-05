@@ -68,6 +68,18 @@ def load_allowed_users(path):
     return set(users)
 
 
+def log_unauthorized(sender):
+    # JSON escapa saltos de línea y controles de nombres elegidos por el usuario.
+    username = sender.get('username')
+    print(json.dumps({
+        'event': 'unauthorized_user',
+        'message': 'Usuario no autorizado; agregar su user_id al JSON para permitir acceso',
+        'user_id': sender.get('id'),
+        'username': '@' + username if username else None,
+        'name': ' '.join(part for part in (sender.get('first_name'), sender.get('last_name')) if part),
+    }, ensure_ascii=False), flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--users-file", type=Path,
@@ -102,7 +114,7 @@ def main():
                         if user_id in allowed_users:
                             display(message)
                         else:
-                            print(f"Usuario no autorizado: user_id={user_id}. Mensaje ignorado.", flush=True)
+                            log_unauthorized(message.get('from', {}))
                     offset = update["update_id"] + 1
             except APIError as error:
                 if error.code in {400, 401, 403, 404, 409}:

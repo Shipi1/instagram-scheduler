@@ -65,12 +65,28 @@ class OrchestratorTests(unittest.TestCase):
             reopened.bind_bot(200)
 
     def test_unauthorized_and_invalid_config_fail_closed(self):
-        self.runner.receive(self.update(user=777))
+        update = self.update(user=777)
+        update['message']['from'].update(username='nuevo_usuario', first_name='Ana')
+        output = io.StringIO()
+        with redirect_stdout(output):
+            self.runner.receive(update)
+        entry = json.loads(output.getvalue())
+        self.assertEqual(entry['user_id'], 777)
+        self.assertEqual(entry['username'], '@nuevo_usuario')
+        self.assertEqual(entry['name'], 'Ana')
+        self.assertNotIn('Descripción', output.getvalue())
         self.assertEqual(len(self.store.rows('SELECT * FROM jobs')), 0)
         self.config.users.write_text('{broken')
         with self.assertRaises(RuntimeError):
             self.runner.receive(self.update(number=2))
         self.assertEqual(self.store.offset(), 2)
+
+    def test_unauthorized_without_username(self):
+        output = io.StringIO()
+        with redirect_stdout(output):
+            self.runner.receive(self.update(user=777))
+        self.assertIsNone(json.loads(output.getvalue())['username'])
+        self.assertEqual(len(self.store.rows('SELECT * FROM jobs')), 0)
 
     def fake_download(self, job, folder):
         path = folder / 'instagram_ABC.mp4'
