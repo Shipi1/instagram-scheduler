@@ -1,4 +1,6 @@
 import json
+import io
+from contextlib import redirect_stdout
 from pathlib import Path
 import shutil
 import subprocess
@@ -110,6 +112,19 @@ class OrchestratorTests(unittest.TestCase):
         self.run_pipeline()
         self.assertEqual(self.job()['status'], 'PREPARED')
         self.runner.ig.call.assert_not_called()
+
+    def test_pipeline_logs_stages_and_cleanup_without_caption(self):
+        output = io.StringIO()
+        with redirect_stdout(output):
+            self.run_pipeline()
+        entries = [json.loads(line) for line in output.getvalue().splitlines()]
+        self.assertEqual([entry['status'] for entry in entries], [
+            'QUEUED', 'DOWNLOADING', 'PREPARING', 'HOSTING', 'CREATING_CONTAINER',
+            'PROCESSING', 'READY_TO_PUBLISH', 'PUBLISHING', 'PUBLISHED', 'PUBLISHED', 'PUBLISHED'])
+        self.assertTrue(all(entry['job_id'] == self.job()['id'] for entry in entries))
+        self.assertEqual(entries[-1]['cleanup'], 'DONE')
+        self.assertNotIn('Descripción', output.getvalue())
+        self.assertNotIn('secret-ig', output.getvalue())
 
     def test_ambiguous_publication_is_not_retried(self):
         self.runner.receive(self.update())

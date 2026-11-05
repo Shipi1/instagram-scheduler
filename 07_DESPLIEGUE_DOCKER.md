@@ -123,6 +123,10 @@ docker compose up -d bot
 docker compose logs -f bot
 ```
 
+Cada etapa confirmada en SQLite también se escribe inmediatamente en la salida del contenedor como una línea JSON con fecha UTC, `job_id`, `status` y una explicación. Incluye cola, descarga, FFmpeg, HTTPS, procesamiento/publicación de Meta y limpieza (`cleanup: DONE`). No imprime tokens, descripción ni URL de descarga del origen. Las notificaciones de Telegram continúan funcionando de forma independiente.
+
+Para ver solo los logs recientes, usa `docker compose logs --tail=100 -f bot`. Después de actualizar el código, ejecuta `docker compose up -d --build bot` para reconstruir y recrear el contenedor con estos cambios.
+
 Al arrancar, el servicio comprueba la identidad del bot, que no exista un webhook y la cuenta de Instagram. Un error de credenciales o configuración impide operar. Para errores de inicio persistentes, detén el servicio antes de corregirlo para evitar reinicios continuos.
 
 ## 6. Primera prueba desde Telegram

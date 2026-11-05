@@ -1,7 +1,37 @@
 from contextlib import contextmanager
+from datetime import datetime, timezone
+import json
 import sqlite3
 import time
 import uuid
+
+
+STAGES = {
+    'QUEUED': 'Trabajo en cola',
+    'DOWNLOADING': 'Descargando video',
+    'PREPARING': 'Preparando video con FFmpeg',
+    'HOSTING': 'Exponiendo archivo y verificando HTTPS',
+    'PREPARED': 'Video preparado; publicación deshabilitada',
+    'CREATING_CONTAINER': 'Creando contenedor en Instagram',
+    'PROCESSING': 'Instagram está procesando el video',
+    'READY_TO_PUBLISH': 'Video listo para publicar',
+    'PUBLISHING': 'Publicando en Instagram',
+    'PUBLISHED': 'Publicación confirmada',
+    'FAILED': 'Trabajo fallido',
+    'NEEDS_REVIEW': 'Trabajo pendiente de revisión',
+    'CANCELLED': 'Trabajo cancelado',
+}
+
+
+def log_stage(job_id, status, **details):
+    # Solo campos operativos: sin tokens, descripción ni URLs de descarga.
+    print(json.dumps({
+        'time': datetime.now(timezone.utc).isoformat(),
+        'job_id': job_id, 'status': status,
+        'message': 'Archivos del trabajo eliminados' if details.get('cleanup') == 'DONE'
+                   else STAGES.get(status, status),
+        **details,
+    }, ensure_ascii=False), flush=True)
 
 
 class Store:
@@ -56,6 +86,7 @@ class Store:
 
     def receive(self, update_id, message, request=None, reply=None, account='', version=''):
         """Aceptar trabajo, respuesta y offset en una sola transacción."""
+        created_job = None
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             row = db.execute("SELECT value FROM settings WHERE key='offset'").fetchone()
@@ -80,10 +111,13 @@ class Store:
                          url, shortcode, account, version, caption, now, now))
                     db.execute('INSERT INTO events VALUES (?,?,?)', (job_id, 'QUEUED', now))
                     reply = f'Trabajo recibido: {job_id}'
+                    created_job = job_id
             if reply and message:
                 db.execute('INSERT INTO outbox(chat_id,text) VALUES (?,?)',
                            (message['chat']['id'], reply))
             db.execute("INSERT OR REPLACE INTO settings VALUES ('offset',?)", (str(update_id + 1),))
+        if created_job:
+            log_stage(created_job, 'QUEUED')
 
     def get(self, job_id):
         with self.connect() as db:
@@ -106,6 +140,8 @@ class Store:
                 row = db.execute('SELECT chat_id FROM jobs WHERE id=?', (job_id,)).fetchone()
                 db.execute('INSERT INTO outbox(chat_id,text) VALUES (?,?)',
                            (row[0], f'{job_id}: {notice}'))
+        log_stage(job_id, status, **{key: value for key, value in fields.items()
+                                    if key in {'container_id', 'media_id', 'permalink', 'cleanup'}})
 
     def summary(self, user_id):
         rows = self.rows('SELECT id,status,permalink FROM jobs WHERE user_id=? ORDER BY created DESC LIMIT 5',
