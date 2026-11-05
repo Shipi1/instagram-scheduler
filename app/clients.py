@@ -14,7 +14,7 @@ class RemoteError(RuntimeError):
 class Instagram:
     def __init__(self, config):
         self.config = config
-        self.base = f'https://graph.facebook.com/{config.version}'
+        self.base = 'https://graph.facebook.com' + (f'/{config.version}' if config.version else '')
 
     def call(self, method, path, **params):
         url = self.base + '/' + path

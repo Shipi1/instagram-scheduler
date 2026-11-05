@@ -33,9 +33,10 @@ class Config:
         tg, ig = required('TELEGRAM_BOT_TOKEN'), required('IG_ACCESS_TOKEN')
         if any(c.isspace() for c in tg + ig) or ':' not in tg:
             raise RuntimeError('Formato de token inválido.')
-        account, version = required('IG_USER_ID'), required('GRAPH_API_VERSION')
-        if not account.isdigit() or not re.fullmatch(r'v\d+\.\d+', version):
-            raise RuntimeError('Revisa IG_USER_ID y GRAPH_API_VERSION (vNN.N).')
+        account = required('IG_USER_ID')
+        version = os.getenv('GRAPH_API_VERSION', '').strip()
+        if not account.isdigit() or (version and not re.fullmatch(r'v\d+\.\d+', version)):
+            raise RuntimeError('Revisa IG_USER_ID y GRAPH_API_VERSION (vNN.N o vacía).')
         url = required('PUBLIC_MEDIA_BASE_URL').rstrip('/')
         parts = urlsplit(url)
         if parts.scheme != 'https' or not parts.hostname or parts.username or parts.password or parts.query or parts.fragment:

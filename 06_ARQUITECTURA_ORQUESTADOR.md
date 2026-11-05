@@ -140,7 +140,7 @@ INSTAGRAM_COOKIES_FILE=
 
 Las rutas del ejemplo son absolutas. El futuro cargador leerá `.env` desde la raíz del proyecto, sin depender de dónde se ejecute el comando, y dará prioridad a las variables del entorno. Admitirá valores entre comillas, UTF-8 y descripciones de una línea; no interpretará `\n` como salto de línea. Para una descripción de varias líneas se utiliza el mensaje de Telegram.
 
-Los cambios en `.env` requieren reiniciar el servicio. Los cambios válidos del JSON de usuarios no. El arranque debe rechazar tokens vacíos, rutas inseguras y una versión Graph sin configurar; no debe imprimir secretos.
+Los cambios en `.env` requieren reiniciar el servicio. Los cambios válidos del JSON de usuarios no. El arranque debe rechazar tokens vacíos, rutas inseguras y una versión Graph con formato inválido si se especifica; la versión es opcional. No debe imprimir secretos.
 
 Actualmente solo `check_auth.py` y `publish_test.py` cargan el `.env` raíz. `telegram_receive.py` lee `TELEGRAM_BOT_TOKEN` del entorno o lo pide por terminal; no carga `.env`. El descargador y preparador usan argumentos, no estas variables. `DEFAULT_REEL_CAPTION` todavía no está implementada y `publish_test.py` sigue usando `--caption`.
 

@@ -57,7 +57,7 @@ TELEGRAM_BOT_TOKEN=TOKEN_DE_BOTFATHER
 IG_ACCESS_TOKEN=TOKEN_VALIDO_DE_META
 IG_USER_ID=17841408002274944
 IG_EXPECTED_USERNAME=tula.posting
-# Escribir aquí una versión vigente de Meta, con formato vNN.N.
+# Opcional: versión con formato vNN.N; puede quedar vacía.
 GRAPH_API_VERSION=
 DEFAULT_REEL_CAPTION="Mi descripción predeterminada #reels"
 PUBLIC_MEDIA_BASE_URL=https://api.shipisnature.com/ig-scheduler/file
@@ -65,7 +65,7 @@ HOST_MEDIA_DIR=/home/ubuntu/ig-scheduler-files
 PUBLISH_ENABLED=false
 ```
 
-Sustituye tokens, cuenta y dominio si recreas el proyecto para otra persona. `GRAPH_API_VERSION` es obligatoria en el orquestador: escribe la versión soportada que hayas elegido en tu app de Meta y compruébala con `check_auth.py --login unified`. La prueba anterior sin versión explícita no demuestra que cualquier versión funcione.
+Sustituye tokens, cuenta y dominio si recreas el proyecto para otra persona. `GRAPH_API_VERSION` es opcional: vacía o ausente usa `https://graph.facebook.com`, igual que la prueba que funcionó. Si se indica, debe tener formato `vNN.N` y usarse una versión soportada y comprobada con `check_auth.py --login unified`. Fijarla es una recomendación para despliegues estables, no un requisito de arranque. Los trabajos guardan su versión; cambiarla con trabajos pendientes requiere revisar esos trabajos.
 
 `DEFAULT_REEL_CAPTION` se usa solo si no hay descripción después del enlace. Puede ser vacía. Se guarda en SQLite al recibir el mensaje, por lo que cambiarla no altera trabajos existentes. Usa una sola línea en `.env`; los saltos escritos como `\n` no son una función de plantillas del bot. Para descripciones multilínea, envía el texto en Telegram.
 

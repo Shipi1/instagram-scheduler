@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
 
-from app.clients import RemoteError
+from app.clients import Instagram, RemoteError
 from app.config import Config
 from app.runner import Runner, parse_message
 from app.store import Store
@@ -152,7 +152,7 @@ class OrchestratorTests(unittest.TestCase):
         self.assertIsNone(self.job()['media_id'])
         self.assertEqual(self.runner.ig.call.call_count, 3)
 
-    def test_config_container_paths_and_required_version(self):
+    def test_config_container_paths_and_optional_version(self):
         env = {
             'TELEGRAM_BOT_TOKEN':'123:fake', 'IG_ACCESS_TOKEN':'fake',
             'IG_USER_ID':'999', 'IG_EXPECTED_USERNAME':'example', 'GRAPH_API_VERSION':'v99.0',
@@ -163,7 +163,16 @@ class OrchestratorTests(unittest.TestCase):
             config = Config.load()
             self.assertFalse(config.publish)
             self.assertEqual(config.public, self.config.public)
+            self.assertEqual(Instagram(config).base, 'https://graph.facebook.com/v99.0')
         env['GRAPH_API_VERSION'] = ''
+        with patch.dict('os.environ', env, clear=True), patch('app.config.load_env'):
+            config = Config.load()
+            self.assertEqual(config.version, '')
+            self.assertEqual(Instagram(config).base, 'https://graph.facebook.com')
+        del env['GRAPH_API_VERSION']
+        with patch.dict('os.environ', env, clear=True), patch('app.config.load_env'):
+            self.assertEqual(Config.load().version, '')
+        env['GRAPH_API_VERSION'] = 'incorrecta'
         with patch.dict('os.environ', env, clear=True), patch('app.config.load_env'):
             with self.assertRaises(RuntimeError):
                 Config.load()
