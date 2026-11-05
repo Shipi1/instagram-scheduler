@@ -8,6 +8,7 @@ Empieza por [07_DESPLIEGUE_DOCKER.md](07_DESPLIEGUE_DOCKER.md): configuración, 
 - [Autenticación y publicación aislada validadas](03_ESTADO_VALIDADO_Y_OPERACION.md)
 - [Descarga y preparación aisladas](04_DESCARGAR_REEL_EN_SERVIDOR.md)
 - [Receptor de Telegram aislado](05_TELEGRAM_RECEPCION.md)
+- [Prueba de lectura de DMs y Reels compartidos en Instagram](08_PRUEBA_MENSAJES_INSTAGRAM.md)
 
 Pruebas locales sin credenciales ni publicaciones:
 
