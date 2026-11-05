@@ -1,0 +1,14 @@
+.env
+.env.*
+.git
+.venv
+__pycache__
+**/__pycache__
+*.pyc
+tmp
+data
+config
+downloads
+tests
+*.mp4
+*cookies*

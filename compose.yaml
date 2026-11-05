@@ -1,0 +1,28 @@
+services:
+  bot:
+    build: .
+    init: true
+    restart: unless-stopped
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    env_file: .env
+    environment:
+      DATA_DIR: /data
+      PUBLIC_MEDIA_DIR: /media
+      TELEGRAM_USERS_FILE: /config/telegram_users.json
+    volumes:
+      - ./data:/data
+      - ./config:/config:ro
+      - ${HOST_MEDIA_DIR:-/home/ubuntu/ig-scheduler-files}:/media
+    stop_grace_period: 45s
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

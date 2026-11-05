@@ -1,0 +1,9 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+tmp/
+downloads/
+*cookies*.txt
+data/
+config/telegram_users.json
